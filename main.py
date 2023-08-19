@@ -7,7 +7,7 @@ import sys
 
 
 def choose_random_word():
-    with open("words.txt") as wordList:
+    with open("answers.txt") as wordList:
         word_list = wordList.read().splitlines()
         return random.choice(word_list)
 
@@ -21,6 +21,7 @@ def word_is_real(guess):
 
 
 word = choose_random_word()
+print(word)
 print("Lets play wordle!")
 print("Guess a 5 letter word.")
 
@@ -97,7 +98,7 @@ def check_double_letters_word():
 def signal_handler(sig, frame):
     print("\nYou pressed Ctrl+C!")
     print(word)
-    time.sleep(2)
+    time.sleep(1)
     os.system("cls")
     sys.exit(0)
 
