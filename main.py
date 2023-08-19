@@ -12,6 +12,14 @@ def choose_random_word():
         return random.choice(word_list)
 
 
+def word_is_real(guess):
+    isrealword = False
+    with open("words.txt") as wordlist:
+        if wordlist.read().find(guess) != -1:
+            isrealword = True
+    return isrealword
+
+
 word = choose_random_word()
 print("Lets play wordle!")
 print("Guess a 5 letter word.")
@@ -45,7 +53,6 @@ def incorrect():
             letters_had += guess[i]
     print("".join(output))
     print(fg("white"))
-    print("")
     letters_had = ""
     wordle()
 
@@ -53,15 +60,15 @@ def incorrect():
 def wordle():
     global guess
     guess = input("")
-    if len(guess) == 5:
+
+    if len(guess) == 5 and word_is_real(guess):
         if guess.lower() == word:
             print("Correct!")
             os.system("cls")
         else:
             incorrect()
-            # compare(check_double_letters_word(word), check_double_letters_guess(guess))
     else:
-        print("Must be 5 letters")
+        print("Must be a real 5 letter english word")
         wordle()
 
 
