@@ -1,7 +1,7 @@
 # wordle
 wordle made by a 15 year old
 
-# Installation guide
+## Installation guide
 
     1 Download the zip file
     2 Unzip it to a file so you know where it is
