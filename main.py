@@ -1,9 +1,20 @@
-import time
 from colored import fg
-import random
 import os
+import random
 import signal
 import sys
+import time
+
+global guess
+global word
+global type_
+
+
+def what_is_daily_word():
+    with open("dailyword.txt") as dailywordtxt:
+        daily_word = dailywordtxt.read()
+        dailywordtxt.close()
+    return daily_word
 
 
 def choose_random_word():
@@ -12,25 +23,25 @@ def choose_random_word():
         return random.choice(word_list)
 
 
-def word_is_real(guess):
-    isrealword = False
+def word_is_real(guess_):
+    is_real_word = False
     with open("words.txt") as wordlist:
-        if wordlist.read().find(guess) != -1:
-            isrealword = True
-    return isrealword
+        if wordlist.read().find(guess_) != -1:
+            is_real_word = True
+    return is_real_word
 
 
-word = choose_random_word()
-print("Lets play wordle!")
-print("Guess a 5 letter word.")
+timer_start = 0
+timer_finish = 0
+guesses = 0
 
 
 def incorrect():
-    print("incorrect, try again")
+    global guess
 
     output = ["a", "a", "a", "a", "a"]
     letters_had = ""
-
+    delete_last_line()
     for i in range(min(len(guess), 5)):
         if check_double_letters_guess() and not check_double_letters_word():
             if guess[i] == word[i]:
@@ -53,23 +64,51 @@ def incorrect():
             letters_had += guess[i]
     print("".join(output))
     print(fg("white"))
-    letters_had = ""
     wordle()
 
 
 def wordle():
     global guess
-    guess = input("")
+    global guesses
+    global timer_start
+    global timer_finish
+    global word
+    global type_
 
+    if guesses == 0:
+        guess = input("Type a 5 letter word\n")
+    elif guesses > 0:
+        guess = input("Wrong, try again\n")
+
+    if type_ == "inf":
+        word = choose_random_word()
+    elif type_ == "daily":
+        word = what_is_daily_word()
+    type_ = ""
     if len(guess) == 5 and word_is_real(guess):
+        guesses += 1
         if guess.lower() == word:
-            print("Correct!")
-            os.system("cls")
+            if guesses == 1:
+                print("Correct!")
+                print("You got it first try, lucky bastard!")
+                print("It took you 0 seconds")
+            else:
+                timer_finish = time.time()
+                os.system("cls")
+                rounded_time = str(round(total_time(timer_finish, timer_start), 2))
+                print("Took you " + rounded_time + " seconds and " + str(guesses) + " guesses to get it!")
+
         else:
+            if guesses == 1:
+                timer_start = time.time()
             incorrect()
     else:
         print("Must be a real 5 letter english word")
         wordle()
+
+
+def total_time(timer_finished_, timer_start_):
+    return timer_finished_-timer_start_
 
 
 def check_double_letters_guess():
@@ -94,13 +133,45 @@ def check_double_letters_word():
     return duplicate_char_word
 
 
+def what_type():
+    global type_
+    global guess
+    print("Lets play wordle!")
+    type_ = input("Do you want play the daily wordle(daily) or the infinite version(inf)\n")
+    type_ = type_.lower()
+    if type_ == "inf" or type_ == "daily":
+
+        wordle()
+    else:
+        print("Type either 'inf' or 'daily' so lets restart!")
+        time.sleep(1)
+        os.system("cls")
+        what_type()
+
+
+def delete_last_line():
+    sys.stdout.write('\x1b[1A')
+    sys.stdout.write('\x1b[2K\n')
+
+
 def signal_handler(sig, frame):
-    print("\nYou pressed Ctrl+C!")
-    print(word)
-    time.sleep(2)
+    global timer_finish
+    global timer_start
+
+    timer_finish = time.time()
+    rounded_time = str(round(total_time(timer_finish, timer_start), 2))
+    if timer_start == 0:
+        print("You have not guessed any word and already gave up!")
+    else:
+        print("Took you " + rounded_time + " seconds and " + str(guesses) + " guesses to give up!")
+    # print("\nYou pressed ctrl+c")
+    print("\nThe word was " + word)
+
+    time.sleep(3)
     os.system("cls")
     sys.exit(0)
 
 
 signal.signal(signal.SIGINT, signal_handler)
-wordle()
+
+what_type()
