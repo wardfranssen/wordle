@@ -13,12 +13,9 @@ with open("dailywords.txt", "r") as wordlistss:
 with open("dailywords.txt", "w") as wordlistss:
     wordlistss.write(content.replace(daily_word, ""))
 
-
 with open("Already_had_daily.txt", "a") as wordlist:
     wordlist.write(daily_word + "\n")
-    wordlist.write(str(datetime.datetime.now()))
     wordlist.close()
-
 
 open('.dailyword.txt', 'w').close()
 with open(".dailyword.txt", "a") as dailywordtxt:
