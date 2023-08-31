@@ -21,7 +21,8 @@ with open("alreadyHadDaily.txt", "a") as alreadyHadDaily:
     alreadyHadDaily.write(daily_word + "\n")
     alreadyHadDaily.close()
 
-open('dailyword.txt', 'w').close() # clears dailyword.txt
+ # clears dailyword.txt
+open('dailyword.txt', 'w').close()
 
 # writes the new daily word in the file
 with open("dailyword.txt", "a") as dailyword:
