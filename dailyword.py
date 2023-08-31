@@ -1,7 +1,5 @@
-import datetime
 import random
 import os
-import time
 
 with open("dailywords.txt") as wordlists:
     word_list = wordlists.read().splitlines()
