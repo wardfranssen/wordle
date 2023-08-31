@@ -2,12 +2,12 @@ import random
 import os
 
 # picks a random word from dailywords.txt
-with open("dailywords.txt") as wordlists:
-    word_list = wordlists.read().splitlines()
+with open("dailywords.txt") as dailywords:
+    word_list = dailywords.read().splitlines()
     daily_word = random.choice(word_list)
-    word_list.close()
+    dailywords.close()
 
-# reads the dailywords so it can remove the new daily word
+# reads the dailywords, so it can remove the new daily word
 with open("dailywords.txt", "r") as dailywords:
     content = dailywords.read()
     dailywords.close()
@@ -22,9 +22,10 @@ with open("alreadyHadDaily.txt", "a") as alreadyHadDaily:
     alreadyHadDaily.close()
 
 open('dailyword.txt', 'w').close() # clears dailyword.txt
+
 # writes the new daily word in the file
 with open("dailyword.txt", "a") as dailyword:
     dailyword.write(daily_word)
     dailyword.close()
 
-#os.system("shutdown /s /t 1")
+# os.system("shutdown /s /t 1")
