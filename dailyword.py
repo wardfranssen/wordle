@@ -22,4 +22,4 @@ with open(".dailyword.txt", "a") as dailywordtxt:
     dailywordtxt.write(daily_word)
     dailywordtxt.close()
 
-os.system("shutdown /s /t 1")
+#os.system("shutdown /s /t 1")
