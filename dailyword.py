@@ -17,9 +17,9 @@ with open("dailywords.txt", "w") as dailywords:
     dailywords.write(content.replace(daily_word, ""))
 
 # adds the new daily word to the file
-with open("Already_had_daily.txt", "a") as Already_had:
-    Already_had.write(daily_word + "\n")
-    Already_had.close()
+with open("alreadyHadDaily.txt", "a") as alreadyHadDaily:
+    alreadyHadDaily.write(daily_word + "\n")
+    alreadyHadDaily.close()
 
 open('dailyword.txt', 'w').close() # clears dailyword.txt
 # writes the new daily word in the file
