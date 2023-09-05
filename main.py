@@ -1,6 +1,8 @@
+from bs4 import BeautifulSoup
 from colored import fg
 import os
 import random
+import requests
 import signal
 import sys
 import time
@@ -8,15 +10,23 @@ import time
 global guess
 global word
 global type_
-prev_guess_yellow = []
-prev_guess_green = []
 
 
 def what_is_daily_word():
-    with open("dailyword.txt") as dailywordtxt:
-        daily_word = dailywordtxt.read()
-        dailywordtxt.close()
-    return daily_word
+    try:
+        response = requests.get("https://docs.google.com/document/d/e/2PACX-1vSM3EGzJP-hcDNGgW0xonlEaAe368tNEfSUbiA5hpL"
+                                "92M7WifGrjlU_CYofV1srq8tmghDnVXW-7LCu/pub")
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            # Extract text content from the HTML
+            text_content = " ".join([p.get_text() for p in soup.find_all('p')])
+            return text_content
+        else:
+            print("Failed to fetch Google Doc. Status code:", response.status_code)
+            return None
+    except Exception as e:
+        print("Error:", str(e), "\n try again or message ward.python@gmail.com")
+        return None
 
 
 def choose_random_word():
@@ -38,43 +48,16 @@ timer_finish = 0
 guesses = 0
 
 
-def hardmode(guess_):
-    global guess
-    global prev_guess_yellow
-    global prev_guess_green
-    global place_green
-    print(prev_guess_green)
-    for i in range(len(place_green)):
-        if prev_guess_green[place_green[i]] != guess[i]:
-            print("Green must be in the same place")
-            wordle()
-    for i in range(len(prev_guess_yellow)):
-        if prev_guess_yellow[i] not in guess:
-            print("Yellow must be in your new guess")
-            wordle()
-
-
 def incorrect():
     global guess
-    global prev_guess_yellow
-    global prev_guess_green
-    global place_green
-    place_green = []
-    prev_guesses = []
     output = ["a", "a", "a", "a", "a"]
     letters_had = ""
     delete_last_line()
-    prev_guesses.append(guess)
-    if type_ == "hard" and guesses > 1:
-        print(guess)
-        hardmode(guess)
     for i in range(min(len(guess), 5)):
         if check_double_letters_guess() and not check_double_letters_word():
             if guess[i] == word[i]:
                 output[i] = fg("green") + guess[i]
                 letters_had += guess[i]
-                prev_guess_green.append(guess[i])
-
     for i in range(min(len(guess), 5)):
         if guess[i] in word and guess[i] != word[i]:
             if guess[i] in letters_had:
@@ -83,16 +66,12 @@ def incorrect():
             else:
                 output[i] = fg("yellow") + guess[i]
                 letters_had += guess[i]
-                prev_guess_yellow.append(guess[i])
         elif guess[i] == word[i]:
             output[i] = fg("green") + guess[i]
             letters_had += guess[i]
-            prev_guess_green.append(guess[i])
-            place_green.append(i)
         else:
             output[i] = fg("white") + guess[i]
             letters_had += guess[i]
-    print(prev_guess_yellow)
     print("".join(output))
     print(fg("white"))
     wordle()
@@ -108,18 +87,16 @@ def wordle():
     game_finished = False
     if guesses == 0:
         guess = input("Type a 5 letter word\n")
-        prev_guess = guess
     elif guesses > 0:
-        prev_guess = guess
         guess = input("Wrong, try again\n")
 
-    if type_ == "inf" or type_ == "hard" and guesses == 0:
+    if guesses < 1 and type_ == "inf":
         word = choose_random_word()
-    elif type_ == "daily":
+    elif guesses < 1 and type_ == "daily":
         word = what_is_daily_word()
     if len(guess) == 5 and word_is_real(guess):
         guesses += 1
-        if guess.lower() == word:
+        if guess.lower() == word.lower():
             if guesses == 1:
                 print("Correct!")
                 print("You got it first try, lucky bastard!")
@@ -175,11 +152,11 @@ def what_type():
     print("Lets play wordle!")
     type_ = input("Do you want play the daily wordle(daily) or the infinite version(inf)\n")
     type_ = type_.lower()
-    if type_ == "inf" or type_ == "daily" or type_ == "hard":
+    if type_ == "inf" or type_ == "daily":
         wordle()
     else:
         print("Type either 'inf' or 'daily' so lets restart!")
-        time.sleep(10)
+        time.sleep(2)
         os.system("cls")
         what_type()
 
