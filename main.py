@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from colored import fg
 import os
 import random
 import requests
@@ -7,40 +6,41 @@ import signal
 import sys
 import time
 
-global guess
-global word
-global type_
-
 
 def what_is_daily_word():
-    try:
-        response = requests.get("https://docs.google.com/document/d/e/2PACX-1vSM3EGzJP-hcDNGgW0xonlEaAe368tNEfSUbiA5hpL"
-                                "92M7WifGrjlU_CYofV1srq8tmghDnVXW-7LCu/pub")
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # Extract text content from the HTML
-            text_content = " ".join([p.get_text() for p in soup.find_all('p')])
-            return text_content
-        else:
-            print("Failed to fetch Google Doc. Status code:", response.status_code)
-            return None
-    except Exception as e:
-        print("Error:", str(e), "\n try again or message ward.python@gmail.com")
+    response = requests.get("https://docs.google.com/document/d/e/2PACX-1vSM3EGzJP-hcDNGgW0xonlEaAe368tNEfSUbiA5hpL"
+                            "92M7WifGrjlU_CYofV1srq8tmghDnVXW-7LCu/pub")
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Extract text content from the HTML
+        text_content = " ".join([p.get_text() for p in soup.find_all('p')])
+        return text_content
+    else:
+        print("Failed to fetch Google Doc. Status code:", response.status_code)
+        print("\n try again or message ward.python@gmail.com")
         return None
 
 
 def choose_random_word():
-    with open("answers.txt") as wordList:
-        word_list = wordList.read().splitlines()
-        return random.choice(word_list)
+    try:
+        with open("answers.txt") as wordList:
+            word_list = wordList.read().splitlines()
+            return random.choice(word_list)
+    except FileNotFoundError:
+        print("Couldn't find answers.txt make sure you have it in the same directory as this script.")
+        sys.exit(0)
 
 
 def word_is_real(guess_):
-    is_real_word = False
-    with open("words.txt") as wordlist:
-        if wordlist.read().find(guess_) != -1:
-            is_real_word = True
-        return is_real_word
+    try:
+        is_real_word = False
+        with open("words.txt") as wordlist:
+            if wordlist.read().find(guess_) != -1:
+                is_real_word = True
+            return is_real_word
+    except FileNotFoundError:
+        print("Couldn't find words.txt make sure you have it in the same directory as this script.")
+        sys.exit(0)
 
 
 timer_start = 0
@@ -49,31 +49,30 @@ guesses = 0
 
 
 def incorrect():
-    global guess
     output = ["a", "a", "a", "a", "a"]
     letters_had = ""
     delete_last_line()
     for i in range(min(len(guess), 5)):
-        if check_double_letters_guess() and not check_double_letters_word():
+        if double_letters_guess() and not double_letters_word():
             if guess[i] == word[i]:
-                output[i] = fg("green") + guess[i]
+                output[i] = "\u001b[32m" + guess[i]  # green
                 letters_had += guess[i]
     for i in range(min(len(guess), 5)):
         if guess[i] in word and guess[i] != word[i]:
             if guess[i] in letters_had:
-                output[i] = fg("white") + guess[i]
+                output[i] = "\u001b[37m" + guess[i]  # white
                 letters_had += guess[i]
             else:
-                output[i] = fg("yellow") + guess[i]
+                output[i] = "\u001b[33m" + guess[i]  # yellow
                 letters_had += guess[i]
         elif guess[i] == word[i]:
-            output[i] = fg("green") + guess[i]
+            output[i] = "\u001b[32m" + guess[i]  # green
             letters_had += guess[i]
         else:
-            output[i] = fg("white") + guess[i]
+            output[i] = "\u001b[37m" + guess[i]  # white
             letters_had += guess[i]
     print("".join(output))
-    print(fg("white"))
+    print("\u001b[37m")  # white
     wordle()
 
 
@@ -122,10 +121,10 @@ def wordle():
 
 
 def total_time(timer_finished_, timer_start_):
-    return timer_finished_-timer_start_
+    return timer_finished_ - timer_start_
 
 
-def check_double_letters_guess():
+def double_letters_guess():
     not_duplicate_char = []
     duplicate_char_guess = []
     for i in range(min(len(guess), 5)):
@@ -136,7 +135,7 @@ def check_double_letters_guess():
     return duplicate_char_guess
 
 
-def check_double_letters_word():
+def double_letters_word():
     not_duplicate_char_word = []
     duplicate_char_word = []
     for i in range(min(len(word), 5)):
@@ -176,7 +175,6 @@ def signal_handler(sig, frame):
         print("You have not guessed any word and already gave up!")
     else:
         print("Took you " + rounded_time + " seconds and " + str(guesses) + " guesses to give up!")
-    # print("\nYou pressed ctrl+c")
     print("\nThe word was " + word)
 
     time.sleep(3)
@@ -184,6 +182,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
+# if ctrl+c gets pressed call function signal_handler
 signal.signal(signal.SIGINT, signal_handler)
-
+# start the game
 what_type()
