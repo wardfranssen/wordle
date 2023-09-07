@@ -85,9 +85,9 @@ def wordle():
     global type_
     game_finished = False
     if guesses == 0:
-        guess = input("Type a 5 letter word\n")
+        guess = input("Type a 5 letter word\n").strip().lower()
     elif guesses > 0:
-        guess = input("Wrong, try again\n")
+        guess = input("Wrong, try again\n").strip().lower()
 
     if guesses < 1 and type_ == "inf":
         word = choose_random_word()
